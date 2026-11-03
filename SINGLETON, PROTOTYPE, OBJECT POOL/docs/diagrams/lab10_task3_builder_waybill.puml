@@ -1,0 +1,75 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+class Waybill <<Product>> {
+  -sender : String
+  -receiverName : String
+  -receiverPhone : String
+  -weightKg : double
+  -dimensions : String
+  -declaredValue : double
+  -cashOnDelivery : double
+  -returnDocuments : boolean
+  -packaging : String
+  -insurance : boolean
+  ~Waybill(builder : WaybillBuilder)
+  +toString() : String
+}
+
+class WaybillBuilder <<Builder>> {
+  ~sender : String
+  ~receiverName : String
+  ~receiverPhone : String
+  ~weightKg : double
+  ~dimensions : String
+  ~declaredValue : double
+  ~cashOnDelivery : double
+  ~returnDocuments : boolean
+  ~packaging : String
+  ~insurance : boolean
+  +sender(sender : String) : WaybillBuilder
+  +receiver(name : String) : WaybillBuilder
+  +receiverPhone(phone : String) : WaybillBuilder
+  +weight(weightKg : double) : WaybillBuilder
+  +dimensions(length : int, width : int, height : int) : WaybillBuilder
+  +declaredValue(amount : double) : WaybillBuilder
+  +cashOnDelivery(amount : double) : WaybillBuilder
+  +returnDocuments() : WaybillBuilder
+  +packaging(type : String) : WaybillBuilder
+  +insurance() : WaybillBuilder
+  +build() : Waybill
+  -validate() : String
+}
+
+class WaybillDirector <<Director>> {
+  +documents(sender : String, receiver : String, phone : String) : Waybill
+  +codParcel(sender : String, receiver : String, phone : String, weightKg : double) : Waybill
+}
+
+class Main <<Client>> {
+  -{static} demonstrateWaybills() : void
+}
+
+WaybillBuilder ..> Waybill : <<create>>
+Waybill ..> WaybillBuilder : <<read>>
+WaybillDirector "1" ..> "*" WaybillBuilder : <<create>>
+WaybillDirector ..> Waybill
+Main ..> WaybillDirector
+Main ..> WaybillBuilder
+Main ..> Waybill
+
+note right of WaybillBuilder
+  build() checks sender, receiver, receiver phone
+  and weight > 0. On error it logs
+  "Cannot create waybill: ..." and throws
+  IllegalStateException, so no incomplete
+  Waybill can exist.
+end note
+
+note right of WaybillDirector
+  Typical waybills ("documents",
+  "cash on delivery parcel") use one
+  fixed sequence of steps, defined here.
+end note
+@enduml

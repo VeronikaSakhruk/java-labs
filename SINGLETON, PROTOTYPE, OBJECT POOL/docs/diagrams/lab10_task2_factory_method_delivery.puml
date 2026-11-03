@@ -1,0 +1,88 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+abstract class DeliveryProcess <<Creator>> {
+  #{abstract} createDelivery() : Delivery
+  +{final} arrange(shipmentId : String, address : String, weightKg : double) : void
+}
+
+interface Delivery <<Product>> {
+  +name() : String
+  +cost(weightKg : double) : double
+  +days() : int
+  +executor() : String
+}
+
+class CourierDeliveryProcess <<ConcreteCreator>> {
+  #createDelivery() : Delivery
+}
+
+class CourierDelivery <<ConcreteProduct, private record>> {
+  +name() : String
+  +cost(weightKg : double) : double
+  +days() : int
+  +executor() : String
+}
+
+DeliveryProcess <|-- CourierDeliveryProcess
+Delivery <|.. CourierDelivery
+CourierDeliveryProcess ..> CourierDelivery : <<create>>
+class ParcelLockerDeliveryProcess <<ConcreteCreator>> {
+  #createDelivery() : Delivery
+}
+
+class ParcelLockerDelivery <<ConcreteProduct, private record>> {
+  +name() : String
+  +cost(weightKg : double) : double
+  +days() : int
+  +executor() : String
+}
+
+DeliveryProcess <|-- ParcelLockerDeliveryProcess
+Delivery <|.. ParcelLockerDelivery
+ParcelLockerDeliveryProcess ..> ParcelLockerDelivery : <<create>>
+class BranchPickupDeliveryProcess <<ConcreteCreator>> {
+  #createDelivery() : Delivery
+}
+
+class BranchPickupDelivery <<ConcreteProduct, private record>> {
+  +name() : String
+  +cost(weightKg : double) : double
+  +days() : int
+  +executor() : String
+}
+
+DeliveryProcess <|-- BranchPickupDeliveryProcess
+Delivery <|.. BranchPickupDelivery
+BranchPickupDeliveryProcess ..> BranchPickupDelivery : <<create>>
+class FloorDeliveryProcess <<ConcreteCreator>> {
+  #createDelivery() : Delivery
+}
+
+class FloorDelivery <<ConcreteProduct, private record>> {
+  +name() : String
+  +cost(weightKg : double) : double
+  +days() : int
+  +executor() : String
+}
+
+DeliveryProcess <|-- FloorDeliveryProcess
+Delivery <|.. FloorDelivery
+FloorDeliveryProcess ..> FloorDelivery : <<create>>
+DeliveryProcess "1" ..> "1" Delivery : <<use>>
+
+class Main <<Client>> {
+  -{static} demonstrateDelivery() : void
+}
+
+Main ..> DeliveryProcess
+Main ..> FloorDeliveryProcess
+
+note right of DeliveryProcess
+  arrange() is the common process.
+  It calls the factory method createDelivery()
+  and never names a concrete delivery class.
+  FloorDeliveryProcess was added without changing it.
+end note
+@enduml

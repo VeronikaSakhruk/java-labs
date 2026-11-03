@@ -1,0 +1,155 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+left to right direction
+
+interface Box <<AbstractProduct>> {
+  +type() : String
+  +describe() : String
+}
+
+interface Filler <<AbstractProduct>> {
+  +type() : String
+  +describe() : String
+}
+
+interface Label <<AbstractProduct>> {
+  +type() : String
+  +describe() : String
+}
+
+interface PackagingKitFactory <<AbstractFactory>> {
+  +createBox() : Box
+  +createFiller() : Filler
+  +createLabel() : Label
+}
+
+class StandardKitFactory <<ConcreteFactory>> {
+  +createBox() : Box
+  +createFiller() : Filler
+  +createLabel() : Label
+}
+
+class StandardBox <<ConcreteProduct, private record>> {
+  +type() : String
+  +describe() : String
+}
+class StandardFiller <<ConcreteProduct, private record>> {
+  +type() : String
+  +describe() : String
+}
+class StandardLabel <<ConcreteProduct, private record>> {
+  +type() : String
+  +describe() : String
+}
+
+class FragileKitFactory <<ConcreteFactory>> {
+  +createBox() : Box
+  +createFiller() : Filler
+  +createLabel() : Label
+}
+
+class FragileBox <<ConcreteProduct, private record>> {
+  +type() : String
+  +describe() : String
+}
+class FragileFiller <<ConcreteProduct, private record>> {
+  +type() : String
+  +describe() : String
+}
+class FragileLabel <<ConcreteProduct, private record>> {
+  +type() : String
+  +describe() : String
+}
+
+class ColdKitFactory <<ConcreteFactory>> {
+  +createBox() : Box
+  +createFiller() : Filler
+  +createLabel() : Label
+}
+
+class ColdBox <<ConcreteProduct, private record>> {
+  +type() : String
+  +describe() : String
+}
+class ColdFiller <<ConcreteProduct, private record>> {
+  +type() : String
+  +describe() : String
+}
+class ColdLabel <<ConcreteProduct, private record>> {
+  +type() : String
+  +describe() : String
+}
+
+class OversizedKitFactory <<ConcreteFactory>> {
+  +createBox() : Box
+  +createFiller() : Filler
+  +createLabel() : Label
+}
+
+class OversizedBox <<ConcreteProduct, private record>> {
+  +type() : String
+  +describe() : String
+}
+class OversizedFiller <<ConcreteProduct, private record>> {
+  +type() : String
+  +describe() : String
+}
+class OversizedLabel <<ConcreteProduct, private record>> {
+  +type() : String
+  +describe() : String
+}
+
+class PackingStation <<Client>> {
+  +pack(shipmentId : String, factory : PackagingKitFactory) : void
+}
+
+class Main <<Client>> {
+  -{static} demonstratePackaging() : void
+}
+
+PackagingKitFactory <|.. StandardKitFactory
+Box <|.. StandardBox
+StandardKitFactory ..> StandardBox : <<create>>
+Filler <|.. StandardFiller
+StandardKitFactory ..> StandardFiller : <<create>>
+Label <|.. StandardLabel
+StandardKitFactory ..> StandardLabel : <<create>>
+PackagingKitFactory <|.. FragileKitFactory
+Box <|.. FragileBox
+FragileKitFactory ..> FragileBox : <<create>>
+Filler <|.. FragileFiller
+FragileKitFactory ..> FragileFiller : <<create>>
+Label <|.. FragileLabel
+FragileKitFactory ..> FragileLabel : <<create>>
+PackagingKitFactory <|.. ColdKitFactory
+Box <|.. ColdBox
+ColdKitFactory ..> ColdBox : <<create>>
+Filler <|.. ColdFiller
+ColdKitFactory ..> ColdFiller : <<create>>
+Label <|.. ColdLabel
+ColdKitFactory ..> ColdLabel : <<create>>
+PackagingKitFactory <|.. OversizedKitFactory
+Box <|.. OversizedBox
+OversizedKitFactory ..> OversizedBox : <<create>>
+Filler <|.. OversizedFiller
+OversizedKitFactory ..> OversizedFiller : <<create>>
+Label <|.. OversizedLabel
+OversizedKitFactory ..> OversizedLabel : <<create>>
+PackingStation ..> PackagingKitFactory : <<use>>
+PackingStation ..> Box
+PackingStation ..> Filler
+PackingStation ..> Label
+Main "1" --> "1" PackingStation
+
+note bottom of Main
+  Main creates the concrete factories
+  and passes them to PackingStation.
+end note
+
+note right of PackingStation
+  Works only with abstractions.
+  OversizedKitFactory and its products were added
+  without changing this class.
+end note
+@enduml

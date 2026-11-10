@@ -1,0 +1,49 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+interface Scale <<Target>> {
+  +weightKg() : double
+  +sizeCm() : double[]
+}
+
+class LegacyScale {
+  +weightKg() : double
+  +sizeCm() : double[]
+}
+
+class PartnerScale <<Adaptee>> {
+  +getWeightPounds() : double
+  +getSizeInches() : double[]
+}
+
+class PartnerScaleAdapter <<Adapter>> {
+  -{static} KG_PER_POUND : double
+  -{static} CM_PER_INCH : double
+  -partnerScale : PartnerScale
+  +PartnerScaleAdapter(partnerScale : PartnerScale)
+  +weightKg() : double
+  +sizeCm() : double[]
+}
+
+class ShipmentIntake <<Client>> {
+  +quote(branch : String, scale : Scale) : double
+}
+
+class Main <<Runner>> {
+  -{static} demonstrateScales() : void
+}
+
+Scale <|.. LegacyScale
+Scale <|.. PartnerScaleAdapter
+PartnerScaleAdapter "1" o-- "1" PartnerScale : partnerScale
+ShipmentIntake ..> Scale : <<use>>
+Main ..> ShipmentIntake
+Main ..> PartnerScaleAdapter : <<create>>
+Main ..> LegacyScale : <<create>>
+
+note right of PartnerScaleAdapter
+  Names and units are converted only here
+  (pounds to kg, inches to cm).
+end note
+@enduml

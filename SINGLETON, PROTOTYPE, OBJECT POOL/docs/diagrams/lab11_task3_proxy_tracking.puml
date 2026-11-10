@@ -1,0 +1,46 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+interface TrackingService <<Subject>> {
+  +getStatus(shipmentId : String) : String
+}
+
+class PartnerTrackingService <<RealSubject>> {
+  -{static} STATUSES : String[]
+  -paidRequests : int
+  +getStatus(shipmentId : String) : String
+  +getPaidRequests() : int
+}
+
+class CachingTrackingProxy <<Proxy>> {
+  -service : TrackingService
+  -ttlMinutes : long
+  -clockMinutes : LongSupplier
+  -cache : Map<String, CacheEntry>
+  +CachingTrackingProxy(service : TrackingService, ttlMinutes : long, clockMinutes : LongSupplier)
+  +getStatus(shipmentId : String) : String
+}
+
+class CacheEntry <<private record>> {
+  -status : String
+  -savedAt : long
+}
+
+class Main <<Client>> {
+  -{static} demonstrateTracking() : void
+}
+
+TrackingService <|.. PartnerTrackingService
+TrackingService <|.. CachingTrackingProxy
+CachingTrackingProxy "1" o-- "1" TrackingService : service
+CachingTrackingProxy "1" *-- "0..*" CacheEntry : cache
+Main ..> TrackingService
+Main ..> CachingTrackingProxy : <<create>>
+Main ..> PartnerTrackingService : <<create>>
+
+note right of CachingTrackingProxy
+  Returns a saved status while its age is below the TTL.
+  Otherwise forwards the call to the paid partner service.
+end note
+@enduml

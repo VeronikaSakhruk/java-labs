@@ -1,0 +1,62 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+class ShipmentFacade <<Facade>> {
+  -addressValidator : AddressValidator
+  -costCalculator : CostCalculator
+  -paymentService : PaymentService
+  -waybillGenerator : WaybillGenerator
+  -routePlanner : RoutePlanner
+  -recipientNotifier : RecipientNotifier
+  +register(channel : String, recipient : String, address : String, weightKg : double) : String
+}
+
+class Main <<Client>> {
+  -{static} demonstrateRegistration() : void
+}
+
+class AddressValidator <<Subsystem>> {
+  +validate(address : String) : boolean
+}
+
+class CostCalculator <<Subsystem>> {
+  +calculate(weightKg : double) : double
+}
+
+class PaymentService <<Subsystem>> {
+  +charge(amount : double) : void
+}
+
+class WaybillGenerator <<Subsystem>> {
+  +generate() : String
+}
+
+class RoutePlanner <<Subsystem>> {
+  +plan(waybill : String, address : String) : void
+}
+
+class RecipientNotifier <<Subsystem>> {
+  +notifyRecipient(recipient : String, waybill : String) : void
+}
+
+class WaybillService <<Singleton, lab 9>> {
+  +{static} getInstance() : WaybillService
+  +nextNumber() : long
+}
+
+ShipmentFacade "1" *-- "1" AddressValidator
+ShipmentFacade "1" *-- "1" CostCalculator
+ShipmentFacade "1" *-- "1" PaymentService
+ShipmentFacade "1" *-- "1" WaybillGenerator
+ShipmentFacade "1" *-- "1" RoutePlanner
+ShipmentFacade "1" *-- "1" RecipientNotifier
+Main ..> ShipmentFacade : <<use>>
+Main ..> CostCalculator : <<use separately>>
+WaybillGenerator ..> WaybillService
+
+note right of ShipmentFacade
+  Branch, online cabinet and terminal call register() only.
+  The order of subsystem calls is defined here once.
+end note
+@enduml

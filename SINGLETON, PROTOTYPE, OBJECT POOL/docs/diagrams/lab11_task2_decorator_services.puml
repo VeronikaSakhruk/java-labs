@@ -1,0 +1,82 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+interface Shipment <<Component>> {
+  +description() : String
+  +cost() : double
+}
+
+class BasicShipment <<ConcreteComponent>> {
+  -id : String
+  -weightKg : double
+  +BasicShipment(id : String, weightKg : double)
+  +description() : String
+  +cost() : double
+}
+
+abstract class ShipmentDecorator <<Decorator>> {
+  -wrapped : Shipment
+  #ShipmentDecorator(wrapped : Shipment)
+  #{abstract} label() : String
+  #{abstract} surcharge() : double
+  +description() : String
+  +cost() : double
+}
+
+class Main <<Client>> {
+  -{static} demonstrateServices() : void
+}
+
+class InsuranceDecorator <<ConcreteDecorator>> {
+  +InsuranceDecorator(wrapped : Shipment)
+  #label() : String
+  #surcharge() : double
+}
+
+ShipmentDecorator <|-- InsuranceDecorator
+
+class PackagingDecorator <<ConcreteDecorator>> {
+  +PackagingDecorator(wrapped : Shipment)
+  #label() : String
+  #surcharge() : double
+}
+
+ShipmentDecorator <|-- PackagingDecorator
+
+class CashOnDeliveryDecorator <<ConcreteDecorator>> {
+  +CashOnDeliveryDecorator(wrapped : Shipment)
+  #label() : String
+  #surcharge() : double
+}
+
+ShipmentDecorator <|-- CashOnDeliveryDecorator
+
+class WeekendDeliveryDecorator <<ConcreteDecorator>> {
+  +WeekendDeliveryDecorator(wrapped : Shipment)
+  #label() : String
+  #surcharge() : double
+}
+
+ShipmentDecorator <|-- WeekendDeliveryDecorator
+
+class SmsNotificationDecorator <<ConcreteDecorator>> {
+  +SmsNotificationDecorator(wrapped : Shipment)
+  #label() : String
+  #surcharge() : double
+}
+
+ShipmentDecorator <|-- SmsNotificationDecorator
+
+Shipment <|.. BasicShipment
+Shipment <|.. ShipmentDecorator
+ShipmentDecorator "1" o-- "1" Shipment : wrapped
+Main ..> Shipment
+Main ..> BasicShipment
+
+note right of ShipmentDecorator
+  Decorators are stacked at runtime in any order
+  and any number of times. A new service is a new
+  subclass; existing classes are not changed.
+end note
+@enduml

@@ -1,0 +1,76 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+abstract class Notification <<Abstraction>> {
+  -channel : Channel
+  #Notification(channel : Channel)
+  #{abstract} text() : String
+  +send(recipient : String) : void
+}
+
+class ArrivalNotification <<RefinedAbstraction>> {
+  -branch : String
+  +ArrivalNotification(channel : Channel, branch : String)
+  #text() : String
+}
+
+class DelayNotification <<RefinedAbstraction>> {
+  -minutes : int
+  +DelayNotification(channel : Channel, minutes : int)
+  #text() : String
+}
+
+class PaymentNotification <<RefinedAbstraction>> {
+  -amount : double
+  +PaymentNotification(channel : Channel, amount : double)
+  #text() : String
+}
+
+interface Channel <<Implementor>> {
+  +name() : String
+  +deliver(recipient : String, text : String) : void
+}
+
+class SmsChannel <<ConcreteImplementor>> {
+  +name() : String
+  +deliver(recipient : String, text : String) : void
+}
+
+class ViberChannel <<ConcreteImplementor>> {
+  +name() : String
+  +deliver(recipient : String, text : String) : void
+}
+
+class EmailChannel <<ConcreteImplementor>> {
+  +name() : String
+  +deliver(recipient : String, text : String) : void
+}
+
+class TelegramChannel <<ConcreteImplementor>> {
+  +name() : String
+  +deliver(recipient : String, text : String) : void
+}
+
+class Main <<Client>> {
+  -{static} demonstrateNotifications() : void
+}
+
+Notification <|-- ArrivalNotification
+Notification <|-- DelayNotification
+Notification <|-- PaymentNotification
+Channel <|.. SmsChannel
+Channel <|.. ViberChannel
+Channel <|.. EmailChannel
+Channel <|.. TelegramChannel
+Notification "*" o-- "1" Channel : channel (bridge)
+Main ..> Notification
+Main ..> Channel
+
+note right of Channel
+  Two independent hierarchies:
+  what is sent (kinds) and how it is
+  delivered (channels). TelegramChannel
+  was added without touching the kinds.
+end note
+@enduml

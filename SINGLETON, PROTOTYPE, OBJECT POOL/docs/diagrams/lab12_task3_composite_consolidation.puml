@@ -1,0 +1,56 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+interface CargoItem <<Component>> {
+  +name() : String
+  +weightKg() : double
+  +declaredValue() : double
+  +shipmentCount() : int
+  +print(indent : String) : void
+  +describe() : String
+}
+
+class Parcel <<Leaf>> {
+  -waybill : String
+  -weightKg : double
+  -declaredValue : double
+  +Parcel(waybill : String, weightKg : double, declaredValue : double)
+  +name() : String
+  +weightKg() : double
+  +declaredValue() : double
+  +shipmentCount() : int
+  +print(indent : String) : void
+}
+
+class CargoGroup <<Composite>> {
+  -kind : String
+  -id : String
+  -children : List<CargoItem>
+  +CargoGroup(kind : String, id : String)
+  +add(item : CargoItem) : CargoGroup
+  +name() : String
+  +weightKg() : double
+  +declaredValue() : double
+  +shipmentCount() : int
+  +print(indent : String) : void
+}
+
+class Main <<Client>> {
+  -{static} demonstrateConsolidation() : void
+  -{static} report(item : CargoItem) : void
+}
+
+CargoItem <|.. Parcel
+CargoItem <|.. CargoGroup
+CargoGroup "1" o-- "0..*" CargoItem : children
+Main ..> CargoItem
+Main ..> CargoGroup : <<create>>
+Main ..> Parcel : <<create>>
+
+note right of CargoGroup
+  One class for bag, pallet and trip (kind field).
+  A group may contain other groups, so a bag in a bag
+  needs no extra code. Totals are recursive sums.
+end note
+@enduml

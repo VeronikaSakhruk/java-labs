@@ -1,0 +1,51 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+class ShipmentTypeFactory <<FlyweightFactory>> {
+  -{static} DEFINITIONS : Map<String, String[]>
+  -types : Map<String, ShipmentType>
+  +get(name : String) : ShipmentType
+  +getCreatedCount() : int
+}
+
+class ShipmentType <<Flyweight>> {
+  -name : String
+  -icon : String
+  -color : String
+  -label : String
+  ~ShipmentType(name : String, icon : String, color : String, label : String)
+  +getName() : String
+  +describe() : String
+}
+
+class ShipmentMarker <<Context>> {
+  -waybill : String
+  -latitude : double
+  -longitude : double
+  -status : String
+  -type : ShipmentType
+  +ShipmentMarker(waybill, latitude, longitude, status, type)
+  +getType() : ShipmentType
+  +describe() : String
+}
+
+class Main <<Client>> {
+  -{static} demonstrateMap() : void
+}
+
+ShipmentTypeFactory "1" o-- "5" ShipmentType : cache
+ShipmentMarker "20000" --> "1" ShipmentType : shared type
+Main ..> ShipmentTypeFactory : <<use>>
+Main ..> ShipmentMarker : <<create>>
+
+note right of ShipmentType
+  Intrinsic (shared) state: icon, color, label.
+  Created once per type by the factory.
+end note
+
+note right of ShipmentMarker
+  Extrinsic (own) state: waybill,
+  coordinates, status.
+end note
+@enduml

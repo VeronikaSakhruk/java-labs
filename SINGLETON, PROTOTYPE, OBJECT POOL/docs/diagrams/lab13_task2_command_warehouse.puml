@@ -1,0 +1,81 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+interface Command <<Command>> {
+  +execute() : void
+  +undo() : void
+  +description() : String
+}
+
+class MoveToSectorCommand <<ConcreteCommand>> {
+  -warehouse : Warehouse
+  -parcelId : String
+  -targetSector : String
+  -previousLocation : String
+  +execute() : void
+  +undo() : void
+  +description() : String
+}
+
+class LoadIntoVehicleCommand <<ConcreteCommand>> {
+  -warehouse : Warehouse
+  -parcelId : String
+  -vehicleId : String
+  -previousLocation : String
+  +execute() : void
+  +undo() : void
+  +description() : String
+}
+
+class MarkDamagedCommand <<ConcreteCommand>> {
+  -warehouse : Warehouse
+  -parcelId : String
+  -previousState : boolean
+  +execute() : void
+  +undo() : void
+  +description() : String
+}
+
+class Warehouse <<Receiver>> {
+  -locations : Map<String, String>
+  -damaged : Set<String>
+  +addParcel(parcelId : String, location : String) : void
+  +getLocation(parcelId : String) : String
+  +isDamaged(parcelId : String) : boolean
+  +place(parcelId : String, location : String) : void
+  +setDamaged(parcelId : String, value : boolean) : void
+}
+
+class OperationQueue <<Invoker>> {
+  -pending : Queue<Command>
+  -executed : Deque<Command>
+  -journal : List<String>
+  +submit(command : Command) : void
+  +processAll() : void
+  +undoLast() : void
+  +printJournal() : void
+}
+
+class Main <<Client>> {
+  -{static} demonstrateWarehouse() : void
+}
+
+Command <|.. MoveToSectorCommand
+Command <|.. LoadIntoVehicleCommand
+Command <|.. MarkDamagedCommand
+MoveToSectorCommand "*" --> "1" Warehouse
+LoadIntoVehicleCommand "*" --> "1" Warehouse
+MarkDamagedCommand "*" --> "1" Warehouse
+OperationQueue "1" o-- "0..*" Command : pending
+OperationQueue "1" o-- "0..*" Command : executed
+Main ..> OperationQueue
+Main ..> Warehouse
+Main ..> Command : <<create>>
+
+note right of OperationQueue
+  Operations wait in a FIFO queue and run one by one,
+  so none is lost. Executed commands go on a stack
+  for undoLast() and every action is written to the journal.
+end note
+@enduml

@@ -1,0 +1,77 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+abstract class ShipmentCheck <<Handler>> {
+  -next : ShipmentCheck
+  +{static} chain(checks : ShipmentCheck...) : ShipmentCheck
+  #{abstract} validate(shipment : Shipment) : String
+  +{final} handle(shipment : Shipment) : boolean
+}
+
+class Shipment <<Request, record>> {
+  +id : String
+  +sender : String
+  +receiver : String
+  +contents : String
+  +weightKg : double
+  +lengthCm : int
+  +widthCm : int
+  +heightCm : int
+  +international : boolean
+  +customsDeclaration : String
+  +lithiumBatteries : boolean
+}
+
+class WaybillCompletenessCheck <<ConcreteHandler>> {
+  #validate(shipment : Shipment) : String
+}
+
+ShipmentCheck <|-- WaybillCompletenessCheck
+
+class ProhibitedItemsCheck <<ConcreteHandler>> {
+  #validate(shipment : Shipment) : String
+}
+
+ShipmentCheck <|-- ProhibitedItemsCheck
+
+class WeightLimitCheck <<ConcreteHandler>> {
+  #validate(shipment : Shipment) : String
+}
+
+ShipmentCheck <|-- WeightLimitCheck
+
+class DimensionsCheck <<ConcreteHandler>> {
+  #validate(shipment : Shipment) : String
+}
+
+ShipmentCheck <|-- DimensionsCheck
+
+class CustomsDeclarationCheck <<ConcreteHandler>> {
+  #validate(shipment : Shipment) : String
+}
+
+ShipmentCheck <|-- CustomsDeclarationCheck
+
+class LithiumBatteryCheck <<ConcreteHandler>> {
+  #validate(shipment : Shipment) : String
+}
+
+ShipmentCheck <|-- LithiumBatteryCheck
+
+class Main <<Client>> {
+  -{static} demonstrateAcceptance() : void
+}
+
+ShipmentCheck "1" o-- "0..1" ShipmentCheck : next
+ShipmentCheck ..> Shipment : <<use>>
+Main ..> ShipmentCheck : <<build chains>>
+Main ..> Shipment : <<create>>
+
+note right of ShipmentCheck
+  handle() logs the check, then either rejects with a reason
+  or forwards to next. Separate chains are built at runtime
+  for domestic and international shipments. LithiumBatteryCheck
+  was added without changing the other checks.
+end note
+@enduml

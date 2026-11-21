@@ -1,0 +1,71 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+interface SortingMediator <<Mediator>> {
+  +parcelScanned(parcelId : String, destination : String) : void
+  +weightMeasured(parcelId : String, weightKg : double) : void
+  +loadingRequested(bagId : String, destination : String) : void
+  +truckArrived(truckId : String, destination : String) : void
+}
+
+class SortingCenterController <<ConcreteMediator>> {
+  -{static} MAX_WEIGHT_KG : double
+  -belt : IntakeBelt
+  -sorter : Sorter
+  -loadingZone : LoadingZone
+  -dockedTrucks : Map<String, String>
+  +connect(belt : IntakeBelt, sorter : Sorter, loadingZone : LoadingZone) : void
+  +parcelScanned(parcelId : String, destination : String) : void
+  +weightMeasured(parcelId : String, weightKg : double) : void
+  +loadingRequested(bagId : String, destination : String) : void
+  +truckArrived(truckId : String, destination : String) : void
+}
+
+class BarcodeScanner <<Colleague>> {
+  -mediator : SortingMediator
+  +scan(parcelId : String, destination : String) : void
+}
+
+class Scale <<Colleague>> {
+  -mediator : SortingMediator
+  +weigh(parcelId : String, weightKg : double) : void
+}
+
+class LoadingZone <<Colleague>> {
+  -mediator : SortingMediator
+  +requestLoading(bagId : String, destination : String) : void
+  +truckArrives(truckId : String, destination : String) : void
+  +startLoading(bagId : String, truckId : String) : void
+}
+
+class IntakeBelt <<Colleague>> {
+  +stop() : void
+}
+
+class Sorter <<Colleague>> {
+  +route(parcelId : String, destination : String) : void
+}
+
+class Main <<Client>> {
+  -{static} demonstrateSortingCenter() : void
+}
+
+SortingMediator <|.. SortingCenterController
+BarcodeScanner "1" --> "1" SortingMediator
+Scale "1" --> "1" SortingMediator
+LoadingZone "1" --> "1" SortingMediator
+SortingCenterController "1" --> "1" IntakeBelt : belt
+SortingCenterController "1" --> "1" Sorter : sorter
+SortingCenterController "1" --> "1" LoadingZone : loadingZone
+Main ..> SortingCenterController : <<create>>
+Main ..> BarcodeScanner
+Main ..> Scale
+
+note right of SortingCenterController
+  All interaction rules live here: routing,
+  the 50 kg overload limit that stops the belt,
+  and loading allowed only when a truck is docked.
+  Devices never call each other.
+end note
+@enduml

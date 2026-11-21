@@ -1,0 +1,68 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+class Shipment <<Subject>> {
+  -id : String
+  -status : ShipmentStatus
+  -observers : List<StatusObserver>
+  +Shipment(id : String)
+  +subscribe(observer : StatusObserver) : void
+  +unsubscribe(observer : StatusObserver) : void
+  +changeStatus(newStatus : ShipmentStatus) : void
+}
+
+enum ShipmentStatus <<State>> {
+  ACCEPTED
+  IN_TRANSIT
+  ARRIVED
+  DELIVERED
+}
+
+interface StatusObserver <<Observer>> {
+  +onStatusChanged(shipmentId : String, status : ShipmentStatus) : void
+}
+
+class Sender <<ConcreteObserver>> {
+  -name : String
+  +onStatusChanged(shipmentId : String, status : ShipmentStatus) : void
+}
+
+class Receiver <<ConcreteObserver>> {
+  -name : String
+  +onStatusChanged(shipmentId : String, status : ShipmentStatus) : void
+}
+
+class OnlineCabinet <<ConcreteObserver>> {
+  +onStatusChanged(shipmentId : String, status : ShipmentStatus) : void
+}
+
+class AccountingDepartment <<ConcreteObserver>> {
+  -cashOnDelivery : double
+  +onStatusChanged(shipmentId : String, status : ShipmentStatus) : void
+}
+
+class OnlineStore <<ConcreteObserver>> {
+  +onStatusChanged(shipmentId : String, status : ShipmentStatus) : void
+}
+
+class Main <<Client>> {
+  -{static} demonstrateTracking() : void
+}
+
+Shipment "1" o-- "0..*" StatusObserver : observers
+Shipment --> "1" ShipmentStatus : status
+StatusObserver <|.. Sender
+StatusObserver <|.. Receiver
+StatusObserver <|.. OnlineCabinet
+StatusObserver <|.. AccountingDepartment
+StatusObserver <|.. OnlineStore
+Main ..> Shipment
+Main ..> StatusObserver : <<subscribe / unsubscribe>>
+
+note right of Shipment
+  The shipment knows only the StatusObserver interface.
+  Subscribers join and leave at runtime.
+  AccountingDepartment reacts only to DELIVERED.
+end note
+@enduml

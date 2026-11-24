@@ -1,0 +1,76 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+interface RouteStrategy <<Strategy>> {
+  +name() : String
+  +build(depot : Address, addresses : List<Address>) : List<Address>
+  +{static} nearestFirst(start : Address, pool : List<Address>, cost : ToDoubleBiFunction) : List<Address>
+}
+
+class ShortestDistanceStrategy <<ConcreteStrategy>> {
+  +name() : String
+  +build(depot : Address, addresses : List<Address>) : List<Address>
+}
+
+class UrgentFirstStrategy <<ConcreteStrategy>> {
+  +name() : String
+  +build(depot : Address, addresses : List<Address>) : List<Address>
+}
+
+class FewestLeftTurnsStrategy <<ConcreteStrategy>> {
+  +name() : String
+  +build(depot : Address, addresses : List<Address>) : List<Address>
+  -clockwiseAngle(depot : Address, address : Address) : double
+}
+
+class CongestionAwareStrategy <<ConcreteStrategy>> {
+  +name() : String
+  +build(depot : Address, addresses : List<Address>) : List<Address>
+}
+
+class EcoRouteStrategy <<ConcreteStrategy>> {
+  -{static} CONGESTED_FROM : double
+  +name() : String
+  +build(depot : Address, addresses : List<Address>) : List<Address>
+}
+
+class CourierRoutePlanner <<Context>> {
+  -courier : String
+  -strategy : RouteStrategy
+  +CourierRoutePlanner(courier : String, strategy : RouteStrategy)
+  +setStrategy(strategy : RouteStrategy) : void
+  +plan(depot : Address, addresses : List<Address>) : List<Address>
+  -length(depot : Address, route : List<Address>) : double
+}
+
+class Address <<Data, record>> {
+  +name : String
+  +x : double
+  +y : double
+  +urgent : boolean
+  +congestion : double
+  +distanceTo(other : Address) : double
+}
+
+class Main <<Client>> {
+  -{static} demonstrateRoutes() : void
+}
+
+RouteStrategy <|.. ShortestDistanceStrategy
+RouteStrategy <|.. UrgentFirstStrategy
+RouteStrategy <|.. FewestLeftTurnsStrategy
+RouteStrategy <|.. CongestionAwareStrategy
+RouteStrategy <|.. EcoRouteStrategy
+CourierRoutePlanner "1" o-- "1" RouteStrategy : strategy
+RouteStrategy ..> Address
+CourierRoutePlanner ..> Address
+Main ..> CourierRoutePlanner
+Main ..> RouteStrategy : <<create, switch>>
+
+note right of CourierRoutePlanner
+  The strategy is replaced at runtime with setStrategy().
+  EcoRouteStrategy was added as one new class,
+  the planner is not changed.
+end note
+@enduml

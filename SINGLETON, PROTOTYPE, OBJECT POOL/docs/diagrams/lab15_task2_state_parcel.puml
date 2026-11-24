@@ -1,0 +1,78 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+class Parcel <<Context>> {
+  -id : String
+  -address : String
+  -state : ParcelState
+  +Parcel(id : String, address : String)
+  +changeAddress(address : String) : void
+  +redirect(address : String) : void
+  +handOver() : void
+  +advance() : void
+  +storageDaysPassed(days : int) : void
+  ~setAddress(address : String) : void
+  ~setState(newState : ParcelState) : void
+}
+
+abstract class ParcelState <<State>> {
+  +{abstract} name() : String
+  +changeAddress(parcel : Parcel, address : String) : void
+  +redirect(parcel : Parcel, address : String) : void
+  +handOver(parcel : Parcel) : void
+  +advance(parcel : Parcel) : void
+  +storageDaysPassed(parcel : Parcel, days : int) : void
+  -refuse(operation : String, reason : String) : void
+}
+
+class CreatedState <<ConcreteState>> {
+  +changeAddress(parcel : Parcel, address : String) : void
+  +advance(parcel : Parcel) : void
+}
+
+class AcceptedState <<ConcreteState>> {
+  +changeAddress(parcel : Parcel, address : String) : void
+  +advance(parcel : Parcel) : void
+}
+
+class InTransitState <<ConcreteState>> {
+  +redirect(parcel : Parcel, address : String) : void
+  +advance(parcel : Parcel) : void
+}
+
+class AtBranchState <<ConcreteState>> {
+  -{static} MAX_STORAGE_DAYS : int
+  +handOver(parcel : Parcel) : void
+  +storageDaysPassed(parcel : Parcel, days : int) : void
+}
+
+class DeliveredState <<ConcreteState>>
+
+class ReturnedState <<ConcreteState>>
+
+class Main <<Client>> {
+  -{static} demonstrateStates() : void
+}
+
+Parcel "1" o-- "1" ParcelState : state
+ParcelState <|-- CreatedState
+ParcelState <|-- AcceptedState
+ParcelState <|-- InTransitState
+ParcelState <|-- AtBranchState
+ParcelState <|-- DeliveredState
+ParcelState <|-- ReturnedState
+CreatedState ..> AcceptedState : <<create>>
+AcceptedState ..> InTransitState : <<create>>
+InTransitState ..> AtBranchState : <<create>>
+AtBranchState ..> DeliveredState : <<create>>
+AtBranchState ..> ReturnedState : <<create>>
+Main ..> Parcel
+
+note right of ParcelState
+  Default implementations refuse the operation with a reason.
+  A state overrides only what it allows and performs the
+  transition itself. A new state is a new subclass, Parcel
+  is not changed.
+end note
+@enduml

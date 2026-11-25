@@ -1,0 +1,55 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+abstract class HandoverProcedure <<AbstractClass>> {
+  +{final} handOver(shipment : Shipment) : void
+  #{abstract} identifyRecipient(shipment : Shipment) : void
+  #{abstract} confirmReceipt(shipment : Shipment) : void
+  #inspectContents(shipment : Shipment) : void
+  -step(number : int, title : String) : void
+  -checkPayment(shipment : Shipment) : void
+  -issueShipment(shipment : Shipment) : void
+  -closeWaybill(shipment : Shipment) : void
+}
+
+class Shipment <<Data, record>> {
+  +id : String
+  +recipient : String
+  +cashOnDelivery : double
+}
+
+class BranchHandover <<ConcreteClass>> {
+  #identifyRecipient(shipment : Shipment) : void
+  #inspectContents(shipment : Shipment) : void
+  #confirmReceipt(shipment : Shipment) : void
+}
+
+class CourierHandover <<ConcreteClass>> {
+  #identifyRecipient(shipment : Shipment) : void
+  #confirmReceipt(shipment : Shipment) : void
+}
+
+class ParcelLockerHandover <<ConcreteClass>> {
+  #identifyRecipient(shipment : Shipment) : void
+  #confirmReceipt(shipment : Shipment) : void
+}
+
+class Main <<Client>> {
+  -{static} demonstrateHandover() : void
+}
+
+HandoverProcedure <|-- BranchHandover
+HandoverProcedure <|-- CourierHandover
+HandoverProcedure <|-- ParcelLockerHandover
+HandoverProcedure ..> Shipment : <<use>>
+Main ..> HandoverProcedure
+Main ..> Shipment : <<create>>
+
+note right of HandoverProcedure
+  handOver() is the template method: six steps in a fixed order,
+  subclasses cannot change it. Steps 1 and 5 are abstract,
+  step 3 is a hook with default behavior (overridden in BranchHandover),
+  steps 2, 4 and 6 (payment check included) exist once, here.
+end note
+@enduml
